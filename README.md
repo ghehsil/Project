@@ -1,2 +1,2 @@
-这是本人上传的第一个项目，有什么不对的还请谅解。
-接下来讲一下我做这个项目的基本流程。首先，先用idea建立一个maven项目，
+  这是用ssm框架做的一个购物系统，具体模块有人员注册、登录(http://localhost:8080/User/Register , http://localhost:8080/User/Login)，管理人员界面(管理员(数据库中人员表有一列属性ytpe，0代表普通用户，1代表管理员用户)登陆后删除、修改人员信息http://localhost:8080/User/list)。
+  普通用户登录成功后，跳转到购物页面(http://localhost:8080/Goods/Customer/list)，在该页面用户可以搜索商品名称跳转到详情页，也可以点击查看具体商品链接跳转到详情页(http://localhost:8080/Goods/Customer/detail)。在详情页里有加入购物车链接，点击后跳转到购物车页面(http://localhost:8080/Goods/Customer/myShoppingCart)。购物车链接里有支付链接(http://localhost:8080/Goods/Customer/pay)、删除购物车链接(包括删除一个、删除全部)(http://localhost:8080/Goods/Customer/deleteOne)(http://localhost:8080/Goods/Customer/deleteAll)。点击支付后，跳转到账单页面(http://localhost:8080/Goods/Customer/myPayment)。
