@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ls.dao.GoodsDao">
+    <insert id="addGoods">
+        INSERT INTO goods(md5Id,name,price,number,picture,detail,enable)
+        VALUES('a',#{goods.name},#{goods.price},#{goods.number},#{goods.picture},#{goods.detail},1);
+    </insert>
+
+    <update id="addMd5Id">
+        UPDATE goods SET md5Id=#{goods.md5Id} WHERE Id=#{goods.Id};
+    </update>
+
+    <update id="deleteGoodsById">
+        UPDATE goods SET enable=0 WHERE md5Id=#{md5Id};
+    </update>
+
+    <select id="insertRepeat" resultType="Goods">
+        SELECT * FROM goods where enable=1 and name=#{name};
+    </select>
+
+    <!-- 按md5Id查找明细,用于修改明细 -->
+    <select id="queryGoodsDetail" resultType="Goods">
+        SELECT * FROM goods where md5Id=#{md5Id};
+    </select>
+
+    <!-- 更新,没图片 -->
+    <update id="updateGoodsDetailWithoutImg">
+        UPDATE goods SET name=#{goods.name},price=#{goods.price},number=#{goods.number},detail=#{goods.detail} WHERE name=#{goods.name};
+    </update>
+
+    <!-- 更新,有图片 -->
+    <update id="updateGoodsDetail">
+        UPDATE goods SET name=#{goods.name},price=#{goods.price},number=#{goods.number},picture=#{goods.picture},detail=#{goods.detail} WHERE name=#{goods.name};
+    </update>
+
+    <select id="getGoodsTotalNum" resultType="Integer">
+        SELECT COUNT(*) FROM goods WHERE enable=1;
+    </select>
+
+    <select id="getGoodsTotalNumByGoodsType" resultType="Integer">
+        SELECT COUNT(*) FROM goods WHERE enable=1 and goodsTypeId=(select Id from goodstype where typeName=#{typeName});
+    </select>
+
+    <!-- 按商品类型查找 -->
+    <select id="getPageListByGoodsType" resultType="Goods">
+        SELECT * FROM goods WHERE enable=1 and goodsTypeId=(select Id from goodstype where typeName=#{typeName}) LIMIT #{begin},#{pageNum};
+    </select>
+
+    <!-- 查找所有商品 -->
+    <select id="getPageList" resultType="Goods">
+        SELECT * FROM goods WHERE enable=1 LIMIT #{begin},#{pageNum};
+    </select>
+
+    <!-- 得到组合的购物车dto类,组成购物车界面 -->
+    <select id="showShoppingCart" resultType="shoppingCartDetail">
+        select g.Id,g.name,g.price,s.number,g.picture,g.detail from goods g,user u,shoppingcart s where s.goodsId=g.Id and s.userId=u.Id and s.userId=#{Id} limit #{begin},#{pageNum};
+    </select>
+
+    <!-- 根据每个用户返回购物车商品个数,用于分页 -->
+    <select id="getShoppingCartTotalNum" resultType="Integer">
+        SELECT COUNT(*) FROM shoppingcart WHERE userId=#{Id};
+    </select>
+
+    <!-- 第一次插入购物车商品 -->
+    <insert id="addShoppingCart">
+        INSERT INTO shoppingcart(goodsId,userId,number) VALUES(#{goodsId},#{userId},1);
+    </insert>
+
+    <!-- 不是第一次插入购物车商品 -->
+    <update id="addShoppingCartNum">
+        UPDATE shoppingcart SET number=number+1 where userId=#{userId} and goodsId=#{goodsId};
+    </update>
+
+    <!-- 得到一个用户特定商品的个数,用于插入,删除操作 -->
+    <select id="queryShoppingNum" resultType="Integer">
+        SELECT number FROM shoppingcart where userId=#{userId} and goodsId=#{goodsId};
+    </select>
+
+    <!-- 减库存 -->
+    <update id="reduceGoodsNumber">
+        UPDATE goods SET number=number-1 WHERE Id=#{Id};
+    </update>
+
+    <!-- 得到库存,用于删除库存 -->
+    <select id="queryGoodsNum" resultType="Integer">
+        SELECT number FROM goods where Id=#{Id};
+    </select>
+
+    <!-- 根据goodsId得到md5值 -->
+    <select id="getMd5Id" resultType="Long">
+        SELECT Id FROM goods where md5Id=#{md5Id};
+    </select>
+
+    <!-- 第一次删除购物车商品 -->
+    <update id="deleteOne">
+        UPDATE shoppingcart SET number=number-1 where userId=#{userId} and goodsId=#{goodsId};
+    </update>
+
+    <!-- 把库存加一个回去 -->
+    <update id="addOneGoodsNum">
+        UPDATE goods set number=number+1 where Id=#{Id};
+    </update>
+
+    <!-- 不是第一次删除购物车商品 -->
+    <delete id="deleteAll">
+        DELETE FROM shoppingcart where userId=#{userId} and goodsId=#{goodsId};
+    </delete>
+
+    <!-- 把所有库存加回去 -->
+    <update id="addAllGoodsNum">
+        UPDATE goods set number=number+#{number} where Id=#{Id};
+    </update>
+
+    <!-- 得到购物车商品个数,用于删除、插入 -->
+    <select id="queryShoppingGoodsNum" resultType="Integer">
+        SELECT number FROM shoppingcart where userId=#{userId} and goodsId=#{goodsId};
+    </select>
+
+    <!-- 给账单增加记录 -->
+    <insert id="addPayment">
+        insert into payment(userId,goodsId,number) values(#{userId},#{goodsId},#{number});
+    </insert>
+
+    <!-- 查找购物车Id以便插入账单中 -->
+    <select id="queryShoppingCartNum" resultType="Integer">
+        select number from shoppingcart where userId=#{userId} and goodsId=#{goodsId};
+    </select>
+
+    <!-- 给购物车减记录 -->
+    <delete id="deleteShoppingCart">
+        DELETE FROM shoppingcart where goodsId=#{goodsId} and userId=#{userId};
+    </delete>
+
+    <!-- 得到账单明细 -->
+    <select id="queryPayment" resultType="paymentDetail">
+        select g.name,g.price,p.number,g.price*p.number,g.picture,g.detail from goods g,payment p where g.Id=p.goodsId and p.userId=#{Id} limit #{begin},#{pageNum};
+    </select>
+
+    <!-- 查找商品类型 -->
+    <select id="queryGoodsType" resultType="goodsType">
+        select typeName from goodstype where enable=1;
+    </select>
+</mapper>
